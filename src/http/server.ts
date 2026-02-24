@@ -1,6 +1,42 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
+import { db } from "../db/connection";
 import { env } from "../env";
+import { restaurants, users } from "../db/schema";
 
-new Elysia().get("/", () => "Hello, Elysia on Bun!").listen(env.PORT);
+const app = new Elysia().post(
+  "/restaurants",
+  async ({ body, set }) => {
+    const { restaurantName, managerName, email, phone } = body;
 
-console.log(`🦊 Server running at http://localhost:${env.PORT}`);
+    const [manager] = await db
+      .insert(users)
+      .values({
+        name: managerName,
+        email,
+        phone,
+        role: "manager",
+      })
+      .returning({
+        id: users.id,
+      });
+
+    await db.insert(restaurants).values({
+      name: restaurantName,
+      managerId: manager.id,
+    });
+
+    set.status = 204;
+  },
+  {
+    body: t.Object({
+      restaurantName: t.String(),
+      managerName: t.String(),
+      phone: t.String(),
+      email: t.String({ format: "email" }),
+    }),
+  },
+);
+
+app.listen(env.PORT, () => {
+  console.log(`🦊 HTTP server running at http://localhost:${env.PORT}`);
+});
