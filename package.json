@@ -8,6 +8,7 @@
     "start": "NODE_ENV=production bun src/http/server.ts",
     "generate": "drizzle-kit generate",
     "migrate": "bun src/db/migrate.ts",
+    "seed": "bun src/db/seed.ts",
     "test": "bun test"
   },
   "devDependencies": {
@@ -20,6 +21,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@paralleldrive/cuid2": "^3.3.0",
     "chalk": "^5.6.2",
     "dotenv": "^17.3.1",
