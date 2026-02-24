@@ -8,6 +8,13 @@
       "when": 1771950109564,
       "tag": "0000_steep_namor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771959086895,
+      "tag": "0001_noisy_power_pack",
+      "breakpoints": true
     }
   ]
 }
