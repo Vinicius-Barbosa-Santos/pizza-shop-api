@@ -6,7 +6,7 @@ import { authLinks } from "../../db/schema";
 
 export const sendAuthLink = new Elysia().post(
   "/authenticate",
-  async ({ body }) => {
+  async ({ body, set }) => {
     const { email } = body;
 
     const userFromEmail = await db.query.users.findFirst({
@@ -21,10 +21,18 @@ export const sendAuthLink = new Elysia().post(
 
     const authLinkCode = createId();
 
-    await db.insert(authLinks).values({
-      userId: userFromEmail.id,
-      code: authLinkCode,
-    });
+    const [saved] = await db
+      .insert(authLinks)
+      .values({
+        userId: userFromEmail.id,
+        code: authLinkCode,
+      })
+      .returning({
+        id: authLinks.id,
+        code: authLinks.code,
+        userId: authLinks.userId,
+        createdAt: authLinks.createdAt,
+      });
 
     const authLink = new URL("/auth-links/authenticate/", env.API_BASE_URL);
 
@@ -32,6 +40,7 @@ export const sendAuthLink = new Elysia().post(
     authLink.searchParams.append("redirect", env.AUTH_REDIRECT_URL);
 
     console.log(authLink.toString());
+    set.status = 204;
   },
   {
     body: t.Object({

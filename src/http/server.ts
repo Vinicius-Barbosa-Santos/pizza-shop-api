@@ -4,6 +4,7 @@ import { cors } from "@elysiajs/cors";
 import { registerRestaurant } from "./routes/register-restaurant";
 import { sendAuthLink } from "./routes/send-auth-link";
 import { authenticateFromLink } from "./routes/authenticate-from-link";
+import { signOut } from "./routes/sign-out";
 
 const app = new Elysia()
   .use(
@@ -14,7 +15,8 @@ const app = new Elysia()
   )
   .use(registerRestaurant)
   .use(sendAuthLink)
-  .use(authenticateFromLink);
+  .use(authenticateFromLink)
+  .use(signOut);
 
 app.listen(env.PORT, () => {
   console.log(`🦊 HTTP server running at http://localhost:${env.PORT}`);

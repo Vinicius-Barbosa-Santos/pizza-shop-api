@@ -1,13 +1,13 @@
-import { Elysia, t } from "elysia";
+import { t } from "elysia";
 import { auth } from "../auth";
 import { db } from "../../db/connection";
 import dayjs from "dayjs";
 import { authLinks } from "../../db/schema";
 import { eq } from "drizzle-orm";
 
-export const authenticateFromLink = new Elysia().use(auth).get(
+export const authenticateFromLink = auth.get(
   "/auth-links/authenticate/",
-  async ({ query, jwt: { sign }, set }) => {
+  async ({ query, set, signUser }) => {
     const { code, redirect } = query;
 
     const authLinkFromCode = await db.query.authLinks.findFirst({
@@ -35,15 +35,10 @@ export const authenticateFromLink = new Elysia().use(auth).get(
       },
     });
 
-    const token = await sign({
+    await signUser({
       sub: authLinkFromCode.userId,
       restaurantId: managedRestaurant?.id,
     });
-
-    // ✅ Setando cookie manualmente (Node/Elysia)
-    set.headers["Set-Cookie"] = `auth=${token}; HttpOnly; Path=/; Max-Age=${
-      60 * 60 * 24 * 7
-    }`;
 
     await db.delete(authLinks).where(eq(authLinks.code, code));
 
