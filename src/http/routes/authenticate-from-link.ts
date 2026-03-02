@@ -42,9 +42,9 @@ export const authenticateFromLink = auth.get(
 
     await db.delete(authLinks).where(eq(authLinks.code, code));
 
-    // ✅ Redirecionamento correto no Node
-    set.status = 302;
-    set.headers.Location = redirect || "/";
+    // ✅ Redirecionamento correto no Node (temporariamente desativado)
+    // set.status = 302;
+    // set.headers.Location = redirect || "/";
 
     return;
   },

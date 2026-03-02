@@ -19,19 +19,49 @@ export const auth = new Elysia()
     }),
   )
   .use(cookie())
-  .derive(({ jwt, removeCookie, set }) => {
+  .derive(async ({ jwt, removeCookie, set, cookie, request }) => {
     return {
       signUser: async (payload: Static<typeof jwtPayload>) => {
         const token = await jwt.sign(payload);
 
-        // ✅ Setando cookie manualmente (Node/Elysia)
         set.headers["Set-Cookie"] = `auth=${token}; HttpOnly; Path=/; Max-Age=${
           60 * 60 * 24 * 7
         }`;
       },
-
       signOut: () => {
         removeCookie("auth");
+      },
+
+      getCurrentUser: async () => {
+        const raw = (cookie as any)?.auth;
+        const authHeader = request.headers.get("authorization") || undefined;
+        const bearer = authHeader?.startsWith("Bearer ")
+          ? authHeader.slice(7).trim()
+          : undefined;
+
+        let cookieToken: string | undefined;
+        if (typeof raw === "string") {
+          cookieToken = raw;
+        } else if (raw?.value && typeof raw.value === "string") {
+          cookieToken = raw.value;
+        } else if (
+          raw?.initial?.value &&
+          typeof raw.initial.value === "string"
+        ) {
+          cookieToken = raw.initial.value;
+        }
+
+        const token = (cookieToken ?? bearer) || "";
+        const payload = await jwt.verify(token);
+
+        if (!payload) {
+          throw new Error("Unauthorized");
+        }
+
+        return {
+          userId: payload.sub,
+          restaurantId: payload.restaurantId,
+        };
       },
     };
   });

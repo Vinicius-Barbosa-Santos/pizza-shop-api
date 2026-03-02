@@ -5,5 +5,9 @@ declare module "elysia/context" {
       restaurantId?: string;
     }) => Promise<void>;
     signOut: () => void;
+    getCurrentUser: () => Promise<{
+      userId: string;
+      restaurantId?: string;
+    }>;
   }
 }
